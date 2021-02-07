@@ -4,5 +4,5 @@ require_once 'functions.php';
 use Josantonius\Request\Request;
 
 if(Request::isGet()) {
-    DB::insertUser("frans", "test123", "http://google.co.id");    
+    DB::insertUser("frans2", md5("test123"), "http://localhost:8082/receiver.php");    
 }

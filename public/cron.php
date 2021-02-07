@@ -8,7 +8,7 @@ if(Request::isGet()) {
 }
 
 function runCron() {
-    $take = 2;
+    $take = 1;
 
     $queue = getTopQueue($take);
 

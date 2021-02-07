@@ -29,6 +29,19 @@ function getUserFromToken(string $token, string $type) {
     return $user;
 }
 
+function getUserFromId(int $id) {
+    try {
+        $db = new PostgresDb(DB_NAME, HOST, USERNAME, PASSWORD);
+        $db->getConnection();
+    } catch (Exception $e) {
+        echo $e->getMessage();
+    }
+
+    $user = $db->where("id", $id)->getOne("users");
+
+    return $user;
+}
+
 function getTopQueue(int $take) {
     try {
         $db = new PostgresDb(DB_NAME, HOST, USERNAME, PASSWORD);
@@ -76,14 +89,13 @@ function returnBadRequest(string $message = "") {
  */
 function hitCallback(array $sent_mail, string $url) {
     $client = new GuzzleHttp\Client();
-    $res = $client->request('GET', $url, [
-       $sent_mail
+    $res = $client->post($url, [
+       "body" => json_encode($sent_mail),
+       "verify" => false,
     ]);
-    echo $res->getStatusCode();
-    // "200"
-    echo $res->getHeader('content-type')[0];
-    // 'application/json; charset=utf8'
+
     echo $res->getBody();
+
     return true;
 }
 
@@ -91,10 +103,13 @@ function hitCallback(array $sent_mail, string $url) {
  * Send email from parameters
  */
 function sendEmail(string $recepient, string $subject, string $html, string $raw) {
-    $sent_mail = [];
-    $url = "";
+    $sent_mail = [
+        "recepient_email" => $recepient,
+        "subject" => $subject,
+        "html" => $html,
+        "raw" => $raw,
+    ];
 
-    hitCallback($sent_mail, $url);
     return true;
 }
 
@@ -142,9 +157,17 @@ class DB {
             // remove from queue
             $sent_mail = $db->where('id', $q['id'])->delete('queue', DB::$queue);
 
-            // send the email
-            sendEmail($sent_mail['recepient'], $sent_mail['subject'], $sent_mail['html'], $sent_mail['raw']);
-            
+            // if sent mail delete success
+            if(count($sent_mail) > 0) {
+                // get the user
+                $user = getUserFromId($sent_mail['id_sender']);
+
+                // if send mail success then hit user's callback url
+                if(sendEmail($sent_mail['recepient'], $sent_mail['subject'], $sent_mail['html'], $sent_mail['raw'])) {
+                    hitCallback($sent_mail, $user["url"]);
+                }
+            }
+
             // unset id so will be no duplicate keys
             unset($sent_mail['id']);
 
@@ -157,7 +180,7 @@ class DB {
         $db = self::getConnection();
         
         $query = $db->insert('queue', [
-            'recepient' => $request->data->recepient,
+            'recepient' => $request->data->recepient_email,
             'raw' => $request->data->raw, 
             'html' => $request->data->html, 
             'subject' => $request->data->subject,
