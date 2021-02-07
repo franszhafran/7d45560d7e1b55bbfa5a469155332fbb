@@ -1,0 +1,46 @@
+{
+	"name": "forrest79/phpgsql",
+	"description": "PostgreSQL library for PHP with fluent interface for SQL query writing.",
+	"keywords": ["php", "database", "postgresql", "fluent"],
+	"type": "library",
+	"license": "BSD-3-Clause",
+	"authors": [
+		{
+			"name": "Jakub Trmota",
+			"email": "jakub@trmota.cz"
+		}
+	],
+	"require": {
+		"php": "^7.1 | ^8.0",
+		"ext-pgsql": "^7.1 | ^8.0"
+	},
+	"require-dev": {
+		"nette/tester": "~2",
+		"phpstan/phpstan": "^0.12",
+		"phpstan/phpstan-strict-rules": "^0.12",
+		"forrest79/phpgsql-phpstan": "^0.1",
+		"consistence/coding-standard": "^3.10",
+		"slevomat/coding-standard": "^6.0"
+	},
+	"suggest": {
+		"ext-json": "Needed to support parse JSON types from PostgreSQL"
+	},
+	"autoload": {
+		"psr-4": {
+			"Forrest79\\PhPgSql\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Forrest79\\PhPgSql\\Tests\\": "tests/",
+			"Forrest79\\PhPgSql\\Benchmarks\\": "benchmarks/"
+		}
+	},
+	"scripts": {
+		"tests": "tests/run-tests tests",
+		"coverage": "tests/collect-coverage tests",
+		"benchmarks": "benchmarks/run-benchmarks.php",
+		"phpcs": "vendor/bin/phpcs -s src tests benchmarks",
+		"phpstan": "vendor/bin/phpstan analyse src tests benchmarks"
+	}
+}

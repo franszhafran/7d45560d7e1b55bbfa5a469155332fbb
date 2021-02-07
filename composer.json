@@ -1,0 +1,9 @@
+{
+    "require": {
+        "phpmailer/phpmailer": "^6.2",
+        "forrest79/phpgsql": "^0.16.0",
+        "seinopsys/postgresql-database-class": "^3.0",
+        "josantonius/request": "^2.0",
+        "guzzlehttp/guzzle": "^7.0"
+    }
+}
