@@ -2,11 +2,21 @@
 require_once '../vendor/autoload.php';
 
 use SeinopSys\PostgresDb;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
 
 const DB_NAME = "emailsender";
 const HOST = "localhost";
 const USERNAME = "frans";
 const PASSWORD = "testPassword";
+
+const SMTP_HOST = "";
+const SMTP_USERNAME = "";
+const SMTP_PASSWORD = "";
+const SMTP_PORT = "";
+const EMAIL_ORIGIN = "";
+const EMAIL_ORIGIN_NAME = "";
 
 function getRequest() {
     $entityBody = file_get_contents('php://input');
@@ -103,12 +113,33 @@ function hitCallback(array $sent_mail, string $url) {
  * Send email from parameters
  */
 function sendEmail(string $recepient, string $subject, string $html, string $raw) {
-    $sent_mail = [
-        "recepient_email" => $recepient,
-        "subject" => $subject,
-        "html" => $html,
-        "raw" => $raw,
-    ];
+    $mail = new PHPMailer(true);
+
+    try {
+        //Server settings
+        $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      // Enable verbose debug output
+        $mail->isSMTP();                                            // Send using SMTP
+        $mail->Host       = SMTP_HOST;                    // Set the SMTP server to send through
+        $mail->SMTPAuth   = false;                                   // Enable SMTP authentication
+        $mail->Username   = SMTP_USERNAME;                     // SMTP username
+        $mail->Password   = SMTP_PASSWORD;                               // SMTP password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
+        $mail->Port       = SMTP_PORT;                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
+
+        //Recipients
+        $mail->setFrom(EMAIL_ORIGIN, EMAIL_ORIGIN_NAME);   // Add a recipient
+        $mail->addAddress($recepient);
+
+        // Content
+        $mail->isHTML(true);                                  // Set email format to HTML
+        $mail->Subject = $subject;
+        $mail->Body    = $html;
+        $mail->AltBody = $raw;
+
+        $mail->send();
+    } catch (Exception $e) {
+        throw new Exception("Email failed to be sent");
+    }
 
     return true;
 }
