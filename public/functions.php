@@ -98,9 +98,14 @@ function returnBadRequest(string $message = "") {
  * Hit user's callback url
  */
 function hitCallback(array $sent_mail, string $url) {
+    $user = getUserFromId($sent_mail['id_sender']);
+    
     $client = new GuzzleHttp\Client();
     $res = $client->post($url, [
-       "body" => json_encode($sent_mail),
+       "body" => json_encode([
+           "secret" => $user['secret'],
+           "data" => $sent_mail
+       ]),
        "verify" => false,
     ]);
 
